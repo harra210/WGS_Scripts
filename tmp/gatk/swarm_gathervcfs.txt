@@ -1,0 +1,1 @@
+cd /data/harrisac2/GVCF_lists/combinedGVCF/; java -Xmx8g -jar $PICARDJARPATH/picard.jar GatherVcfs I= O=243g_JointCall.chrAll.vcf.gz
