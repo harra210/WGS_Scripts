@@ -28,11 +28,11 @@ cd $pwd
 #After switching back to script directory, the script will then iterate across the array and create the contents of the swarmfile
 for ((i = 0; i < ${#directory[@]}; i++))
 do
-	echo "cd ${directory[$i]}; bwa mem -M -t \$SLURM_CPUS_PER_TASK /data/Ostrander/Resources/cf31PMc.fa "${samplename[$i]}"_1.fastq.gz "${samplename[$i]}"_2.fastq.gz > /scratch/$USER/"${samplename[i]}"_temp.sam" >> BWAMem_Swarmfile.txt
+	echo "cd ${directory[$i]}; bwa mem -M -R '@RG\tID:"${samplename[$i]}"\tLB:"${samplename[$i]}"\tPL:ILLUMINA\tSM:"${samplename[$i]}"\tSO:coordinate\tPU:un1' -t \$SLURM_CPUS_PER_TASK /data/Ostrander/Resources/cf31PMc.fa "${samplename[$i]}"_1.fastq.gz "${samplename[$i]}"_2.fastq.gz > /scratch/$USER/"${samplename[i]}"_temp.sam" >> BWAMem_Swarmfile.txt
 done
 #done
 more BWAMem_Swarmfile.txt
 read -sp "`echo -e 'Verify that is swarmfile is correct \nPress Enter to continue or Ctrl+C to abort \n\b'`" -n1 key
 # User is prompted to read the swarm file and the script hangs until user either presses a key to submit to the cluster or Ctrl+C to cancel
 echo "Swarm Job ID: "
-swarm -f BWAMem_Swarmfile.txt -g 18 -t 20 --time 96:00:00 --module bwa --logdir ~/job_outputs/bwa_mem/$SWARM_NAME --sbatch "--mail-type=ALL,TIME_LIMIT_90 --job-name $SWARM_NAME"
+swarm -f BWAMem_Swarmfile.txt -g 32 -t 20 --time 96:00:00 --module bwa --logdir ~/job_outputs/bwa_mem --sbatch "--mail-type=ALL,TIME_LIMIT_90 --job-name $SWARM_NAME"

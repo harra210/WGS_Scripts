@@ -1,0 +1,1 @@
+cd /data/harrisac2/; bcftools index -t --threads $SLURM_CPUS_PER_TASK /data/harrisac2/726g_JointCall.chrAll.RAW.vcf.gz

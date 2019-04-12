@@ -28,7 +28,7 @@ cd $pwd
 #After switching back to script directory, the script will then iterate across the array and create the contents of the swarmfile
 for ((i = 0; i < ${#directory[@]}; i++))
 do
-	echo "cd ${directory[$i]}; bwa mem -M -t \$SLURM_CPUS_PER_TASK /data/Ostrander/Resources/cf31PMc.fa "${samplename[$i]}"_1.fastq.gz "${samplename[$i]}"_2.fastq.gz > /scratch/$USER/"${samplename[i]}"_temp.sam" >> BWAMem_Swarmfile.txt
+	echo "cd ${directory[$i]}; bwa mem -M -t \$SLURM_CPUS_PER_TASK -R \"@RG\tID:"${samplename[$i]}"\tPL:ILLUMINA\tLB:"${samplename[$i]}"\tDS:"${samplename[$i]}"\tPU:un1\tSM:"${samplename[$i]}"\" /data/Ostrander/Resources/cf31PMc.fa "${samplename[$i]}"_1.fastq.gz "${samplename[$i]}"_2.fastq.gz > /scratch/$USER/"${samplename[i]}"_temp.sam" >> BWAMem_Swarmfile.txt
 done
 #done
 more BWAMem_Swarmfile.txt
