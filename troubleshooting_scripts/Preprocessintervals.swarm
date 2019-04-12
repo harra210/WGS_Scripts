@@ -1,0 +1,1 @@
+cd /home/harrisac2/scripts/troubleshooting_scripts; gatk PreprocessIntervals -R /data/Ostrander/Resources/cf31PMc.fa --bin-length 2989318 --padding 0 -O ~/CanFam31_3mbp_Intervals.interval_list

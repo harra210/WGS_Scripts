@@ -1,0 +1,1 @@
+cd /data/Ostrander/Experimental_VCFs/Merge/; vcf-merge 155_Oberbauer.SNP.INDEL.chrAll.vcf.gz 243g_JointCall.SNP.INDEL.chrAll.vcf.gz | bgzip -c > JE_Merge_011219.chrAll.vcf.gz 

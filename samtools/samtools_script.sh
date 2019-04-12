@@ -20,7 +20,7 @@ cd $ST_DIR
 #
 find . -name "*_temp.sam" -printf '%f\n' | sed 's/_temp.sam//' > $pwd_base/tmp/samtools/sam_final.txt
 cd $OUT_DIR
-find $PWD -name "*_1.fastq.gz" -printf '%h\n' &> $pwd_base/tmp/samtools/sam_directory.txt
+find $PWD -name "*_R1.fastq.gz" -printf '%h\n' &> $pwd_base/tmp/samtools/sam_directory.txt
 #
 # mkdir -p $pwd_base/tmp/samtools
 cd $pwd_base/tmp/samtools
@@ -38,10 +38,10 @@ unset IFS
 cd $pwd
 for ((i = 0; i < ${#directory[@]}; i++))
 do
-	echo "cd ${directory[$i]}; samtools view -o "${sample[$i]}"_temp.bam -Shbu /scratch/$USER/"${sample[$i]}"_temp.sam ; samtools sort -o "${directory[$i]}"/sort_"${sample[$i]}".bam -T /lscratch/\$SLURM_JOB_ID/ "${sample[$i]}"_temp.bam; samtools index "${directory[$i]}"/sort_"${sample[$i]}".bam" >> samtools_script_swarmfile.swarm
+	echo "cd ${directory[$i]}; samtools view -o "${sample[$i]}"_temp.bam -Shbu /scratch/$USER/"${sample[$i]}"_temp.sam ; samtools sort -o "${directory[$i]}"/sort_"${sample[$i]}".bam -T /lscratch/\$SLURM_JOB_ID/"${sample[$i]}" "${sample[$i]}"_temp.bam; samtools index "${directory[$i]}"/sort_"${sample[$i]}".bam" >> samtools_script_swarmfile.swarm
 done
 more samtools_script_swarmfile.swarm
 read -sp "`echo -e 'Press any key to continue or Ctrl+C to about \n\b'`" -n1 key
 #
 echo "Swarm JobID #: "
-swarm -f samtools_script_swarmfile.swarm -g 16 --gres=lscratch:200 --time 96:00:00 --module samtools --logdir ~/job_outputs/samtools --sbatch "--mail-type=ALL,TIME_LIMIT_90 --job-name $SWARM_NAME"
+swarm -f samtools_script_swarmfile.swarm -g 16 --gres=lscratch:200 --time 96:00:00 --module samtools --logdir ~/job_outputs/samtools/$SWARM_NAME --sbatch "--mail-type=ALL,TIME_LIMIT_90 --job-name $SWARM_NAME"

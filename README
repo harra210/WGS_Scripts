@@ -1,9 +1,11 @@
-# Written 12/20/2018 by Alex Harris
+# Written 12/20/2018 by Alex Harris - Updated 4/10/2019
 #########################################################
 #							#
 #			INTRODUCTION			#
 #							#
 #########################################################
+"Note before you begin, copy the contents of this folder to your home directory. Do not use these scripts directly out of the shared folder!" Doing so may compromise the integrity of the scripts and break them for your fellow users!
+
 This document serves as a overview for the scripts contained in this folder and will attempt to give an overview of our current NGS pipeline which is based mainly off of the GATK Best Practices for processing raw NGS to versions suitable for downstream analyses. This pipeline is designed for Germline SNPs + Indels and will use the programs BWA-MEM, Samtools, Picard, and the GATK suite. The following will describe each tool and the overview of each script and the version of tool (if applicable) this pipeline currently uses for each step and how to utilize the outputs. This readme will also highlight which outputs will be needed to transfer over to storage to Ketu for analysis.
 
 This Readme is structured in the way the pipeline moves, so there will be repeat sections, such as Picard tools making multiple appearances in this Readme. Note this is not a duplication, but a different tool used within the suites.
@@ -14,10 +16,18 @@ Please note, you should copy a version of this folder to your home directory to 
 
 #########################################################
 #							#
+#		     SRA Toolkit			#
+#							#
+#########################################################
+
+This tool is optional for users to use but it is available if needed. This script will prompt the user to input individual runs that have been uploaded to the SRA database. Note that this tool does NOT accept SRA projects, you must input individual runs for the tool to work as intended. This is a limitation of the NCBI tool itself, not of the script. As such, this script as it stands will most likely not get updated any further. The tool will also prompt the user where they want to download their files to. The end result SHOULD be two files as the reads are split into forward and reverse and be in our denotation of forward is *_1 and reverse is *_2.
+
+#########################################################
+#							#
 #			FASTQ				#
 #							#
 #########################################################
-When receiving FASTQs to analysis, the first step is to concatenate the read pairs together which comprise the full sequence results for the sample. There is no script to perform this step, simply the user needs to concatenate like fastq's together using the unix command: cat file1 file2 > combined_file . For really deep sequencing runs, typically you will see 2 fastq files for each individual pair of the paired in run.
+When receiving FASTQs to analysis, the first step is to concatenate the read pairs together which comprise the full sequence results for the sample. There is the FastqCat script to perform this step, which will ask the user the the read that they want to concatenate and it will find all files within one folder matching the read the user wishes to concatentate and then sort them numerically to ensure that the fastq's are concatenated correctly and then output a singular fastq for a forward/reverse read . For really deep sequencing runs, typically you will see 2 fastq files for each individual pair of the paired in run.
 
 For an example of how to perform this step, see below.
 
@@ -67,6 +77,8 @@ You can open the flagstat file in vim or via command line by typing more "filena
 #			Picard				#
 #							#
 #########################################################
+On top of being able to use the Flagstat tool as a means of QC, there is a Picard script (CollectMetrics.sh) available which on top of Flagstats metrics, this script will collect and report Alignment and Insertsize metrics which the latter will also output a histogram as well. Lastly part of this script is taking use of Samtools' depth tool which will report out average depth so that you can calculate quality of sequencing run based on depth and have that for the metadata tables you have.
+
 Picard tools at this step in the pipeline will be to take the newly minted sorted .bam files and then Add/Replace read groups located in the headers of each .bam. This is important downstream when creating the gVCFs. Unless you have a specific reason to change the current read groups in the script, do not change them. The output of the first half of the script will be a bam file that looks like the one below:
 	"RG_foo.bam" where RG stands for ReadGroup. This RG bam file is a temporary file and can be deleted once the pipeline is completed.
 
@@ -79,7 +91,7 @@ This part of the script will output a marked duplicate .bam file with the naming
 
 It will also output a metrics text file	indicating the numbers of duplicates for both single- and paried-end reads. This file will have the scheme of:
 	"foo_metrics.txt"
-This process has a current wall time set at 4 days.
+!! This process typically takes about 3 days to complete. !!
 
 #########################################################
 #							#
@@ -102,7 +114,9 @@ The goal of this procedure is to correct for systematic bias that affect the ass
 
 #Output
 The output of this tool is a calibrated .bam file that is to be archived as it can be used for analysis. It will have the naming schema of:
-	"foo_BQSR.bam" - Note that there may be BQSR bam's that appear like: "foo_BQSR4.bam", this is to delineate between BQSR bams that have been created using GATK 3.8.0 vs GATK 4.0.8.1
+	"foo_BQSR.bam" - Note that there may be BQSR bam's that appear like: "foo_BQSR4.bam", this is to delineate between BQSR bams that have been created using GATK 3.8.0 vs GATK 4.0.8.0 and onwards.
+
+!! BaseRecalibrator & ApplyBQSR script takes maximum about 4 days to complete !!
 
 ####
 "HaplotypeCaller"
@@ -129,6 +143,8 @@ The other file is an bam in which assembled haplotypes are written to. Note not 
 	"foo_realigned.bam"
 
 TIP - If you are having issues in generating a GVCF and the error you are coming across is at the Smith-Waterman adjustment step, in the script change the flag --smith-waterman from FASTEST_AVAILABLE to JAVA and then re-run. It may take a bit longer however it is the most compatible flag to run.
+
+!! Tool takes about 4 days to complete !!
 
 ####
 "GenomicsDBImport"
@@ -165,6 +181,8 @@ The GATK4 GenotypeGVCFs tool can take only one input track. Options are 1) a sin
 #Output
 The output of this script will be combined VCFs separated out by chromosomes, so if the database contains all 38 chromosomes plus the X chromosomes there should be 39 VCFs ready for the next step which will be to merge the VCFs into one
 
+!! Tool typically takes about 4 days but can take up to 10 !!
+
 ####
 "GatherVCFs"
 Gathers multiple VCF files from a scatter operation into a single VCF file. Input files must be supplied in genomic order and must not have events at overlapping positions.
@@ -178,6 +196,8 @@ VCF files that are in genomic order and do not have any overlapping positions.
 #Output
 A single VCF file. This file is not analysis-ready as it still needs to be filtered.
 
+!! This tool can be performed on the quick partition and take less than 2 hours to complete !!
+
 ####
 "VariantRecalibrator" and "ApplyRecalibration"
 The purpose of variant recalibration is to assign a well-calibrated probability to each variant call in a call set. You can then create highly accurate call sets by filtering based on this single estimate for the accuracy of each call. The approach taken by variant quality score recalibration is to develop a continuous, covarying estimate of the relationship between SNP call annotations (such as QD, MQ, and ReadPosRankSum, for example) and the probability that a SNP is a true genetic variant versus a sequencing or data processing artifact.
@@ -185,3 +205,5 @@ The purpose of variant recalibration is to assign a well-calibrated probability 
 This adaptive error model can then be applied to both known and novel variation discovered in the call set of interest to evaluate the probability that each call is real. The score that gets added to the INFO field of each variant is called the VQSLOD. It is the log odds of being a true variant versus being false under the trained Gaussian mixture model.
 
 This tool performs the first pass in a two-stage process called VQSR; the second pass is performed by the ApplyRecalibration tool. In brief, the first pass consists of creating a Gaussian mixture model by looking at the distribution of annotation values over a high quality subset of the input call set, and then scoring all input variants according to the model. The second pass consists of filtering variants based on score cutoffs identified in the first pass. 
+
+!! This tool takes about 6 hours to complete but can be scheduled for one day !!

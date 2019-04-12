@@ -13,7 +13,8 @@ read -e -p "Read: " READ
 ##### END INTERACTIVE SECTION ######
 NUMREAD=$(sed 's/R//' <<< "$READ")
 cd $FASTQ_DIR
-find . -maxdepth 1 -name "*_"$READ"_*" -printf '%f\n' &> $pwd_base/tmp/fastq/catfastq.tmp
+#find . -maxdepth 1 -name "*_"$READ"_*" -printf '%f\n' &> $pwd_base/tmp/fastq/catfastq.tmp
+find . -maxdepth 1 -name "*_"$READ"*" -printf '%f\n' &> $pwd_base/tmp/fastq/catfastq.tmp
 #
 cd $pwd_base/tmp/fastq/
 IFS=,$'\n' read -d '' -r -a fastq < catfastq.tmp

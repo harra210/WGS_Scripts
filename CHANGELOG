@@ -1,0 +1,33 @@
+Note this changelog is to detail revisions made to the pipeline and help troubleshoot anything should we need to revert to a former version if for whatever reason the scripts fail to work.
+
+1/25/2019 - Pipeline 1.0 Published
+- Updated all scripts to be able to run on local drives without use of editing the scripts, AKA soft-coded scripts.
+- Issues include Gatk 4 Variant Recalibrator tool does not work, will require troubleshooting to determine issue
+- Updated Beta scripts from GATK 4.0.8.1 to GATK 4.0.12.0
+- GATK 4 GenotypeGVCFs updated to include flag "--include-non-variant-sites". This flag was not availale in GATK 4 previous to 4.0.12.0. This may be the root issue as to why our VCFs are different compared to the 722g dataset.
+#
+2/11/2019 - Pipeline 1.1 Pushed
+- Updated all GATK scripts to version 4.1.0.0
+- Issue regarding GATK 4 VariantRecalibrator is now considered closed as issue has been solved. The issue that caused the tool to fail was a syntax error from the developer. The syntax is now correct and has been verified to work.
+- Due to fixing this issue, I believe this makes having a GATK_3.8.0 section redundant. Plan to keep the folder in the active directory for now, will run a few datasets through the pipeline before archiving the folder to the Depreciated folder at a future date.
+- QoL Update: Uupdated all scripts to now prompt the user to name their swarm files so that when performing sjobs or squeue, the job name will show up there to facilitate users in attempting to determine which jobs are still running.
+#
+2/21/2019 - Pipeline 1.1 - Bug Issues
+- GATK 4 GenotypeGVCFs flag "--include-non-variant-sites" does not work as intended. The current issue (from developer side) is that when attempting to perform GenotypeGVCFs with the aforementioned flag, only chr1 will emit the non-variant sites and the other chromosomes will fail. In response, I have removed the flag until the issue is resolved. In the meantime this puts us back to square one with regards to having all variant sites called. As of today, the current workaround being troubleshot is using the old pipline of combineGVCFs (which omits the use of GenomicsDBImport tool) to combine the 722 genomes + Experimental GVCFs together and then output a singular GVCF to perform GenotypeGVCFs. What data we get after this is currently any ones guess, I am currently working on a test set to be sure that this method works as a stop-gap.
+#
+2/27/2019 - Pipeline 1.1.1 - Update pushed
+- GATK 4 GenomicsDBImport - Created the ability to make a database broken down through intervals. The script is named INTERVALS_GenomicsDBImport.sh. This process now creates 203 subjobs and has been verified to work as pushed. Performed a test set of 51 samples and the database creation took about 3 hours to complete and took about 1.6T of disk space. To extrapolate this out to 1000 samples, at that rate would take about 2.5 days to complete. This makes the sole issue to remain is disk space to create a database in. Will discuss around to get more disk space to do this. POSSIBLE UPDATE: If this works out, shortening the amount of intervals would theoretically speed up database creation, however there would be potential issues with submitting to the cluster considering that the swarm is packed as is, bundling doesn't seem to work.
+-GATK 4 GenotypeGVCFs - Updated script to take the output of the aforementioned Genomics DB intervals. This script is named INTERVALS_GenotypeVCFs.sh
+#
+3/26/2019 - Pipeline 1.2.0 - Update pushed
+- Picard - Created QC script, CollectMetrics.sh which is intended to be run after or in place of Samtools Flagstat step on sort.bams.
+- GATK 4 GenomicsDBImport - Updated GenomicsDBImport script to now no longer write your databases to network drive and writes to local scratch. So the way this works is that the DBImport step will write the databases to local scratch and then immediately goes to GenotypegVCFs tool, the output should then be able ready to concatenate.
+- Global QoL Change - Scripts that ask for a swarm name, now no longer simply for ease of viewing the sjobs page. Now when giving your swarm name a variable, your swarm error and output files will be placed in your log folders under that swarm name. This will make finding swarm files faster so that you can troubleshoot easier if needed.
+#
+4/10/2019 - Pipeline 1.3.0 - Update pushed
+- Fully tabled all GATK 3 scripts into the deprecated folder. The scripts will remain in the Deprecated folder for archival purposes. If you need an old script, it exists there but it is no longer being updated, nor used in the pipeline process.
+- GATK 4 - GenomicsDBImport & GenotypegVCFs - Performed housekeeping and moved GenotypegVCFs and the GenomicsdbImport into the Deprecated folder.
+#
+- NEW - GATK4 GenomicsDBImport_GenotypegVCFs - New folder created to better correlate with the pipeline. Since the pipeline no longer generates a database written to disk, but rather a database written to the local scratch partition and combines the two tools together this change has been enacted. Also the major script in this folder labeled "COMBINED..." performs the GenomicsdbImport and GenotypegVCFs tool and will output a RAW vcf based on intervals the end-user sets.
+#
+- NEW - SRA Toolkit - New script that utilizes the SRA toolkit and its fastq-dump feature to download files uploaded to the SRA database. Only caveat to this however is that you can only download individuals (so based on runs) not whole projects. This is a limitation of the tool, not the script.

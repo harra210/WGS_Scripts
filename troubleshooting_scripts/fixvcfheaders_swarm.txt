@@ -1,0 +1,3 @@
+cd /data/Ostrander/Jacquelyn/; java -Xmx4g -jar $PICARDJARPATH/picard.jar FixVcfHeader I=155_Oberbauer.SNP.INDEL.chr11.vcf.gz O=155_Oberbauer.SNP.INDEL.chr11.Headerfixed.vcf.gz H=/data/harrisac2/Jointcall/155_Oberbauer.chr10.vcf.gz
+cd /data/Ostrander/Jacquelyn/; java -Xmx4g -jar $PICARDJARPATH/picard.jar FixVcfHeader I=155_Oberbauer.SNP.INDEL.chr5.vcf.gz O=155_Oberbauer.SNP.INDEL.chr5.Headerfixed.vcf.gz H=/data/harrisac2/Jointcall/155_Oberbauer.chr10.vcf.gz
+cd /data/Ostrander/Jacquelyn/; java -Xmx4g -jar $PICARDJARPATH/picard.jar FixVcfHeader I=155_Oberbauer.SNP.INDEL.chr6.vcf.gz O=155_Oberbauer.SNP.INDEL.chr6.Headerfixed.vcf.gz H=/data/harrisac2/Jointcall/155_Oberbauer.chr10.vcf.gz

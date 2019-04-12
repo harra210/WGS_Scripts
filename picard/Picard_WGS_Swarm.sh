@@ -35,11 +35,11 @@ cd $pwd
 #After switching back to script directory, the script will then iterate across the array and create the contents of the swarmfile
 for ((i = 0; i < ${#directory[@]}; i++))
 do
-	echo "cd ${directory[$i]}/; java -Xmx16g -jar \$PICARDJARPATH/picard.jar AddOrReplaceReadGroups I=sort_"${sample[$i]}".bam O=RG_"${sample[$i]}".bam SO=coordinate RGID=${sample[$i]} RGLB=${sample[$i]} RGPL=ILLUMINA RGSM=${sample[$i]} RGPU=un1; java -Xmx16g -jar \$PICARDJARPATH/picard.jar MarkDuplicates I=RG_"${sample[$i]}".bam O="${directory[$i]}/"dedup_"${sample[$i]}".bam m="${directory[$i]}"/"${sample[$i]}"_metrics.txt REMOVE_DUPLICATES=false ASSUME_SORTED=true TMP_DIR=/lscratch/\$SLURM_JOB_ID" >> picard_script_swarmfile.txt
+	echo "cd ${directory[$i]}/; java -Xmx16g -jar \$PICARDJARPATH/picard.jar AddOrReplaceReadGroups I=sort_"${sample[$i]}".bam O=RG_"${sample[$i]}".bam SO=coordinate RGID=${sample[$i]} RGLB=${sample[$i]} RGPL=ILLUMINA RGSM=${sample[$i]} RGPU=un1; java -Xmx16g -jar \$PICARDJARPATH/picard.jar MarkDuplicates I=RG_"${sample[$i]}".bam O="${directory[$i]}/"dedup_"${sample[$i]}".bam M="${directory[$i]}"/"${sample[$i]}"_metrics.txt REMOVE_DUPLICATES=false ASSUME_SORTED=true TMP_DIR=/lscratch/\$SLURM_JOB_ID" >> picard_script_swarmfile.txt
 done
 more picard_script_swarmfile.txt
 read -sp "`echo -e 'Press any key to continue or Ctrl+C to abort \n\b'`" -n1 key
 #
 echo "Swarm JobID: "
 #
-swarm -f picard_script_swarmfile.txt -g 20 --gres=lscratch:200 --time 96:00:00 --module picard --logdir ~/job_outputs/picard --sbatch "--mail-type=BEGIN,END,FAIL --job-name $SWARM_NAME"
+swarm -f picard_script_swarmfile.txt -g 20 --gres=lscratch:200 --time 96:00:00 --module picard --logdir ~/job_outputs/picard/RG/$SWARM_NAME --sbatch "--mail-type=BEGIN,END,FAIL --job-name $SWARM_NAME"

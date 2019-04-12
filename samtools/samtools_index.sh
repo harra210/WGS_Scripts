@@ -15,6 +15,7 @@ read -e -p "Swarm name: " SWARM_NAME
 #
 cd $DD_DIR
 find $PWD -name "*_1.fastq.gz" -printf '%h\n' &> $pwd_base/tmp/samtools/sam_index_directories.txt
+#find $PWD -name "*_R1.fastq.gz" -printf '%h\n' &> $pwd_base/tmp/samtools/sam_index_directories.txt
 find . -name "dedup_*.bam" -printf '%f\n' | sed 's/dedup_//' | sed 's/.bam//' > $pwd_base/tmp/samtools/sam_index.txt
 #
 cd $pwd_base/tmp/samtools
@@ -38,4 +39,4 @@ more samtools_dedupindex_swarm.txt
 read -sp "`echo -e 'Press any key to continue or Ctrl+C to abort \n\b'`" -n1 key
 #
 echo "Swarm JobID #:"
-swarm -f samtools_dedupindex_swarm.txt -g 4 -t 2 --time 04:00:00 --module samtools --logdir ~/job_outputs/samtools/index --sbatch "--mail-type=ALL,TIME_LIMIT_90 --job-name $SWARM_NAME"
+swarm -f samtools_dedupindex_swarm.txt -g 4 -t 2 --time 04:00:00 --module samtools --logdir ~/job_outputs/samtools/index/$SWARM_NAME --sbatch "--mail-type=ALL,TIME_LIMIT_90 --job-name $SWARM_NAME"
