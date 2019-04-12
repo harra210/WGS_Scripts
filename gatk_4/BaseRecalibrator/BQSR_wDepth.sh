@@ -56,11 +56,11 @@ cd $pwd
 #done
 for ((i = 0; i < ${#directory[@]}; i++)) #ORIGINAL LINE
 do
-	echo "cd ${directory[$i]}/; gatk --java-options \"-Xmx16g -XX:ParallelGCThreads=4\" BaseRecalibrator -bqsr-baq-gap-open-penalty 30.0 -R /data/Ostrander/Resources/cf31PMc.fa --tmp-dir /lscratch/\$SLURM_JOB_ID -I dedup_"${sample[$i]}".bam --known-sites /data/Ostrander/Resources/CFA31_151.dbSNP_num_order.vcf -O "${sample[$i]}"_recal4.table; gatk --java-options \"-Xmx16g -XX:ParallelGCThreads=4\" ApplyBQSR -R /data/Ostrander/Resources/cf31PMc.fa --tmp-dir /lscratch/\$SLURM_JOB_ID -I dedup_"${sample[$i]}".bam -bqsr "${sample[$i]}"_recal4.table -O "${sample[$i]}"_BQSR4.bam" >> gatk4_BRPR_swarmfile.txt
+	echo "cd ${directory[$i]}/; gatk --java-options \"-Xmx16g -XX:ParallelGCThreads=4\" BaseRecalibrator -bqsr-baq-gap-open-penalty 30.0 -R /data/Ostrander/Resources/cf31PMc.fa --tmp-dir /lscratch/\$SLURM_JOB_ID -I dedup_"${sample[$i]}".bam --known-sites /data/Ostrander/Resources/CFA31_151.dbSNP_num_order.vcf -O "${sample[$i]}"_recal.table; gatk --java-options \"-Xmx16g -XX:ParallelGCThreads=4\" ApplyBQSR -R /data/Ostrander/Resources/cf31PMc.fa --tmp-dir /lscratch/\$SLURM_JOB_ID -I dedup_"${sample[$i]}".bam -bqsr "${sample[$i]}"_recal.table -O "${sample[$i]}"_BQSR.bam; samtools depth "${sample[$i]}"_BQSR.bam | awk '{sum+=$3} END {print sum/NR}' > "${sample[$i]}".coverageALL; samtools depth -r chrX "${sample[$i]}"_BQSR.bam | awk '{sum+=$3} END {print sum/NR}' > "${sample[$i]}".coveragechrX" >> gatk4_BRPR_swarmfile.txt
 done
 more gatk4_BRPR_swarmfile.txt
 read -sp "`echo -e 'Press any key to continue or Ctrl+C to abort \n\b'`" -n1 key
 echo "Swarm JobID:"
 #
 #Following section submits swarmfile to the cluster
-swarm -f gatk4_BRPR_swarmfile.txt -g 18 -t 6 --time 120:00:00 --gres=lscratch:200 --module GATK/4.1.0.0 --logdir ~/job_outputs/gatk/BaseRecalibrator --sbatch "--mail-type=ALL,TIME_LIMIT_80 --job-name $SWARM_NAME"
+swarm -f gatk4_BRPR_swarmfile.txt -g 18 -t 6 --time 120:00:00 --gres=lscratch:200 --module samtools,GATK/4.1.0.0 --logdir ~/job_outputs/gatk/BaseRecalibrator --sbatch "--mail-type=ALL,TIME_LIMIT_80 --job-name $SWARM_NAME" --devel
